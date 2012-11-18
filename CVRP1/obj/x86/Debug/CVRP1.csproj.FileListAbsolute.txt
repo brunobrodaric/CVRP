@@ -1,0 +1,5 @@
+c:\users\b\documents\visual studio 2010\Projects\CVRP1\CVRP1\bin\Debug\CVRP1.exe
+c:\users\b\documents\visual studio 2010\Projects\CVRP1\CVRP1\bin\Debug\CVRP1.pdb
+c:\users\b\documents\visual studio 2010\Projects\CVRP1\CVRP1\obj\x86\Debug\ResolveAssemblyReference.cache
+c:\users\b\documents\visual studio 2010\Projects\CVRP1\CVRP1\obj\x86\Debug\CVRP1.exe
+c:\users\b\documents\visual studio 2010\Projects\CVRP1\CVRP1\obj\x86\Debug\CVRP1.pdb
