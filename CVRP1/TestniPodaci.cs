@@ -68,16 +68,6 @@ namespace CVRP1
                                 vrhovi[0].oznaka = 0;
                             }
 
-                            if (lineWords[0] == "DEPOT_SECTION")
-                            {
-                                var lineX = sr.ReadLine();
-                                var lineWordsX = lineX.Split(' ');
-                                vrhovi[0].x = Convert.ToInt32(lineWordsX[1]);
-                                var lineY = sr.ReadLine();
-                                var lineWordsY = lineY.Split(' ');
-                                vrhovi[0].y = Convert.ToInt32(lineWordsY[1]);
-                            }
-
                             if (lineWords[0] == "EOF") break;
                         }
                     }

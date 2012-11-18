@@ -32,7 +32,7 @@ namespace CVRP1
         public double udaljenost(Vrh drugiVrh, int smijeNula = 1)
         {
             double udaljeni;
-            udaljeni = Math.Ceiling(Math.Sqrt(Math.Pow(this.x - drugiVrh.x, 2) + Math.Pow(this.y - drugiVrh.y, 2)));
+            udaljeni = Math.Ceiling(Math.Sqrt(Math.Pow(this.x - drugiVrh.x, 2) + Math.Pow(this.y - drugiVrh.y, 2)));            
             if (udaljeni == 0 && smijeNula == 0) 
                 return 0.000000001;
             else return udaljeni;

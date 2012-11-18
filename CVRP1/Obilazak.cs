@@ -47,14 +47,14 @@ namespace CVRP1
 
         public bool dopustiv(double dopustenaCijena)
         {
-            if (put[0].oznaka != 0) return false;
-            if (put[put.Count() - 1].oznaka != 0) return false;
+            if (put[0].oznaka != 1) return false;
+            if (put[put.Count() - 1].oznaka != 1) return false;
             double cijena = 0;
             foreach (var vrh in put)
             {
                 cijena += vrh.potraznja;
                 if (cijena > dopustenaCijena) return false;
-                if (vrh.oznaka == 0) cijena = 0;
+                if (vrh.oznaka == 1) cijena = 0;
             }
             return true;
         }

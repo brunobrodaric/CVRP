@@ -23,7 +23,7 @@ namespace CVRP1
                                     long kolikoIteracija = -100)
         {
             // ucitavanje testnih podataka
-            TestniPodaci podaci = new TestniPodaci(@"test\A-n32-k5.vrp");
+            TestniPodaci podaci = new TestniPodaci(@"test\B-n34-k5.vrp");
 
             Dictionary<Obilazak, Obilazak> poznataPoboljsanja = new Dictionary<Obilazak, Obilazak>();
                      
@@ -79,11 +79,11 @@ namespace CVRP1
 
                     foreach (var vrh in vrhovi)
                     {
-                            neposjeceniVrhovi.Add(vrh);
+                        if (vrh.oznaka != 0) neposjeceniVrhovi.Add(vrh);
                     }
-                    neposjeceniVrhovi.Remove(vrhovi[0]);
+                    neposjeceniVrhovi.Remove(vrhovi[1]);
 
-                    prijedeniPut[mrav].dodajVrh(vrhovi[0]);  // vrhovi[0] = skladiste, odatle pocinje svaki obilazak
+                    prijedeniPut[mrav].dodajVrh(vrhovi[1]);  // vrhovi[1] = skladiste, odatle pocinje svaki obilazak
 
                     // slijedi konstrukcija kompletnog rjesenja... (to svaki mrav radi)
                     velikaPetlja: while (neposjeceniVrhovi.Count() > 0)
@@ -124,7 +124,7 @@ namespace CVRP1
                             // ako mrav vise ne moze prijeci ni u jedan vrh a da ne dostavi vise nego sto ima, krece opet iz skladista
                             if (moguciVrhovi.Count() == 0)   
                             {
-                                prijedeniPut[mrav].dodajVrh(vrhovi[0]);
+                                prijedeniPut[mrav].dodajVrh(vrhovi[1]);
                                 goto velikaPetlja;
                             };
                             Vrh sljedeciVrh = null;
@@ -258,7 +258,7 @@ namespace CVRP1
                     double ksi = 0.8;
                     double tau0 = 0.0000000002;   // jos nije sigurno da je ovo dobra vrijednost za tau0
 
-                    int prosli = 0;
+                    int prosli = 1;
                     for (int i = 1; i < prijedeniPut[mrav].put.Count(); i++)
                     {
                         feromoni[prijedeniPut[mrav].put[i].oznaka, prosli] = (1 - ksi) * (feromoni[prijedeniPut[mrav].put[i].oznaka, prosli]) + ksi*tau0;
@@ -303,16 +303,16 @@ namespace CVRP1
 
                 double feromonskiDelta = 1 / globalnaMinDuljina;
 
-                for (int i = 0; i <= brojVrhova; i++)
+                for (int i = 1; i <= brojVrhova; i++)
                 {
-                    for (int j = 0; j <= brojVrhova; j++)
+                    for (int j = 1; j <= brojVrhova; j++)
                     {
                         feromoni[i, j] *= 1 - parametarEvaporacije;
                         feromoni[j, i] *= 1 - parametarEvaporacije;                        
                     }
                 }
 
-                int prosli2 = 0;
+                int prosli2 = 1;
                 for (int i = 1; i < globalniNajboljiPut.put.Count(); i++)
                 {
                     feromoni[globalniNajboljiPut.put[i].oznaka, prosli2] += feromonskiDelta;
