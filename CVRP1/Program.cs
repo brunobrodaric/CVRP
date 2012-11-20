@@ -23,7 +23,7 @@ namespace CVRP1
                                     long kolikoIteracija = -100)
         {
             // ucitavanje testnih podataka
-            TestniPodaci podaci = new TestniPodaci(@"test\B-n34-k5.vrp");
+            TestniPodaci podaci = new TestniPodaci(@"test\A-n80-k10.vrp");
 
             Dictionary<Obilazak, Obilazak> poznataPoboljsanja = new Dictionary<Obilazak, Obilazak>();
                      
@@ -76,6 +76,7 @@ namespace CVRP1
                 {
                     List<Vrh> neposjeceniVrhovi = new List<Vrh>();
                     prijedeniPut[mrav] = new Obilazak();
+                    int brojPotpunoSlucajnih = 0;
 
                     foreach (var vrh in vrhovi)
                     {
@@ -120,6 +121,7 @@ namespace CVRP1
                                                      
                             double qParametar = random.NextDouble();
                             double q = 0.6;
+                            double q2 = 1 / ( ( brojPotpunoSlucajnih * 5 )/brojVrhova + 6);
                            
                             // ako mrav vise ne moze prijeci ni u jedan vrh a da ne dostavi vise nego sto ima, krece opet iz skladista
                             if (moguciVrhovi.Count() == 0)   
@@ -131,6 +133,7 @@ namespace CVRP1
                             // imamo dva moguca nacina za izbor sljedeceg vrha, tj. po dvije razlicite formule
                             // (vidi ANT COLONY SYSTEM, npr. u stuzle-99) i slucajno biramo na koji cemo od ta dva nacina
                             // (za to sluze qParametar i q)
+                            // UPDATE: dodan treci nacin: potpuno slucajan izbor! (za potrebe toga dodan parametar q2)
                             if (qParametar > q)
                             {
                                 double r = random.NextDouble();
@@ -174,7 +177,7 @@ namespace CVRP1
                                     }
                                 }
                             }
-                            else
+                            else if (qParametar > q2)
                             {
                                 double najvecaVrijednost = 0;
                                 foreach (var vrh in moguciVrhovi)
@@ -184,10 +187,16 @@ namespace CVRP1
                                     if (vrijednostZaOvajVrh >= najvecaVrijednost)
                                     {
                                         najvecaVrijednost = vrijednostZaOvajVrh;
-                                        sljedeciVrh = vrh;                                    
+                                        sljedeciVrh = vrh;
                                     }
-                                      
+
                                 }
+                            }
+                            else
+                            {
+                                brojPotpunoSlucajnih++;
+                                int indeksSljedeceg = random.Next(0, moguciVrhovi.Count());
+                                sljedeciVrh = moguciVrhovi[indeksSljedeceg];
                             }
                             preostaliKapacitet -= sljedeciVrh.potraznja;
                             prijedeniPut[mrav].dodajVrh(sljedeciVrh);
@@ -224,7 +233,7 @@ namespace CVRP1
                             }
                         }
 
-                        p = 1;
+                      /*  p = 1;
                         while (p == 1)
                         {
                             p = 0;
@@ -237,7 +246,7 @@ namespace CVRP1
                                 nasliSmoBoljiPut = true;
                             }
                         }
-
+                        */
                         if (nasliSmoBoljiPut) 
                             poznataPoboljsanja.Add(ulazniObilazak, prijedeniPut[mrav]);
                         else
@@ -343,8 +352,9 @@ namespace CVRP1
                 double beta = rand.NextDouble() * 8 + 1;
                 double evap = rand.NextDouble() * 0.1 + 0.8;
                 int brojMrava = rand.Next(25, 30);
-
-                Obilazak rjesenje = nadjiRjesenje(25, 1, 2, 0.2, -10);
+                Console.WriteLine(DateTime.Now);
+                Obilazak rjesenje = nadjiRjesenje(25, 1, 2, 0.2, -100);
+                
                 double duljinaObilaskaRjesenja = rjesenje.duljinaObilaska();
                 if (duljinaObilaskaRjesenja < najboljeRjesenje)
                 {
