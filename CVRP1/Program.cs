@@ -23,7 +23,7 @@ namespace CVRP1
                                     long kolikoIteracija = -100)
         {
             // ucitavanje testnih podataka
-            TestniPodaci podaci = new TestniPodaci(@"test\A-n80-k10.vrp");
+            TestniPodaci podaci = new TestniPodaci(@"test\B-n34-k5.vrp");
 
             Dictionary<Obilazak, Obilazak> poznataPoboljsanja = new Dictionary<Obilazak, Obilazak>();
                      
@@ -211,7 +211,7 @@ namespace CVRP1
                     // dvaOpt ili triOpt... medutim, cini se da to ne ubrzava program (mozda nesto nije dobro napravljeno?)... ali ga ni ne
                     // usporava... znaci, to sad nije toliko bitno, prouciti kasnije.
                     
-                    if (brojIteracije % 10 == 1  &&  poznataPoboljsanja.ContainsKey(prijedeniPut[mrav]) == false)
+                    if (brojIteracije % 10 == 9  &&  poznataPoboljsanja.ContainsKey(prijedeniPut[mrav]) == false)
                     {
                         bool nasliSmoBoljiPut = false;
                         Obilazak ulazniObilazak = new Obilazak();
@@ -337,6 +337,7 @@ namespace CVRP1
 
         static void Main(string[] args)
         {
+            
             double najboljeRjesenje = 1000000;
 
             Random rand = new Random();
@@ -348,17 +349,15 @@ namespace CVRP1
                 // ovi parametri trenutno nemaju smisla jer pozivamo program s fiksiranim parametrima, ali ovaj dio programa zapravo
                 // generira neke kvazislucajne parametre, tj. tako nesto se moze iskoristiti kad nesto bitno promijenimo u programu
                 // i nismo sigurni s kojim parametrima novi program najbolje radi, pa ga pustimo da isprobava razne...
-                double alfa = rand.NextDouble() * 0.3 + 0.6;
-                double beta = rand.NextDouble() * 8 + 1;
+                double beta = rand.NextDouble() * 1 + 1;
                 double evap = rand.NextDouble() * 0.1 + 0.8;
-                int brojMrava = rand.Next(25, 30);
+                int brojMrava = rand.Next(20, 30);
                 Console.WriteLine(DateTime.Now);
-                Obilazak rjesenje = nadjiRjesenje(25, 1, 2, 0.2, -100);
+                Obilazak rjesenje = nadjiRjesenje(25, 1, 2, 0.2, 1000);
                 
                 double duljinaObilaskaRjesenja = rjesenje.duljinaObilaska();
                 if (duljinaObilaskaRjesenja < najboljeRjesenje)
                 {
-
                     najboljeRjesenje = duljinaObilaskaRjesenja;
                     rjesenje.ispisi();                   
                     Console.WriteLine(rjesenje.duljinaObilaska());
