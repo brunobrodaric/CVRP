@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Diagnostics;
 
 namespace CVRP1
 {
@@ -124,51 +125,39 @@ namespace CVRP1
             else return null;
         }
 
-        // slicno kao dvaOpt, ali mijenjamo mjesta za 3 vrha (tako da nijedan od njih ne bude gdje je bio)
-        public Obilazak triOpt(double dopustenaCijena, double ulaznaDuljina, Dictionary<Vrh, List<Vrh>> najbliziVrhovi = null)
+        public void nacrtaj()
         {
-            if (put == null) return null;
-            Obilazak obilazak;
-            Obilazak izlazniObilazak = null;
-            List<Obilazak> listaObilazaka = new List<Obilazak>();
+            System.IO.StreamWriter file = new System.IO.StreamWriter("nacrtaj.txt");
 
-            for (int i = 1; i < put.Count(); i++)
+            file.WriteLine("graph{");
+            foreach (var cvor in this.put)
             {
-                for (int j = i; j < put.Count(); j++)
-                {
-                    for (int k = j; k < put.Count(); k++)
-                    {                        
-                        obilazak = new Obilazak();
-                        foreach (var vrh in put) obilazak.dodajVrh(vrh);
-                        Vrh temp = obilazak.put[i];
-                        obilazak.put[i] = obilazak.put[k];
-                        obilazak.put[k] = obilazak.put[j];
-                        obilazak.put[j] = temp;
-                        if (obilazak.dopustiv(dopustenaCijena)) listaObilazaka.Add(obilazak);
-                        obilazak = new Obilazak();
-                        foreach (var vrh in put) obilazak.put.Add(vrh);
-                        temp = obilazak.put[i];
-                        obilazak.put[i] = obilazak.put[j];
-                        obilazak.put[j] = obilazak.put[k];
-                        obilazak.put[k] = temp;
-                        if (obilazak.dopustiv(dopustenaCijena)) listaObilazaka.Add(obilazak);
-                    }
-                }
+                file.WriteLine("resolution=200;");
+                file.WriteLine(cvor.oznaka + "[");
+                file.WriteLine("label = " + cvor.oznaka);
+                file.WriteLine("pos = \"" + cvor.x * 6 + "," + cvor.y * 6 + "!\"");
+                file.WriteLine("width = 0.15");
+                file.WriteLine("height = 0.15");
+                file.WriteLine("fixedsize=true");
+                file.WriteLine("fontsize = 8");
+                if (cvor.oznaka == 1) file.WriteLine("shape = box"); //else file.WriteLine("shape = point");
+                file.WriteLine("]");
             }
 
-            double najboljaDuljina = ulaznaDuljina;
-            foreach (var ob in listaObilazaka)
+            string[] boje = { "red", "navy", "green", "brown", "yellow", "tomato", "dark blue", "deep pink", "teal", "black", "gray", "crimson" };
+
+            int brojBoje = 0;
+            for (int i = 1; i < this.put.Count(); ++i)
             {
-                if (ob.duljinaObilaska() < najboljaDuljina)
-                {
-                    najboljaDuljina = ob.duljinaObilaska();
-                    izlazniObilazak = ob;
-                }
+                file.WriteLine(this.put[i - 1].oznaka + " -- " + this.put[i].oznaka + "[color=\"" + boje[brojBoje] + "\"]");
+                if (this.put[i].oznaka == 1) brojBoje++;
             }
 
-            if (najboljaDuljina < ulaznaDuljina) 
-                return izlazniObilazak;
-            else return null;
+            file.WriteLine("}");
+            file.Close();
+            ProcessStartInfo startInfo = new ProcessStartInfo("dot.exe");
+            startInfo.Arguments = "-Kneato -Goverlap=scaling -Tpng nacrtaj.txt -o nacrtaj.png";
+            Process.Start(startInfo);  
         }
 
     }

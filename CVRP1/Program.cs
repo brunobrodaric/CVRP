@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using QuickGraph;
+using QuickGraph.Graphviz;
+using System.Diagnostics;
 
 namespace CVRP1
 {    
@@ -23,7 +26,7 @@ namespace CVRP1
                                     long kolikoIteracija = -100)
         {
             // ucitavanje testnih podataka
-            TestniPodaci podaci = new TestniPodaci(@"test\A-n80-k10.vrp");
+            TestniPodaci podaci = new TestniPodaci(@"test\B-n34-k5.vrp");
 
             Dictionary<Obilazak, Obilazak> poznataPoboljsanja = new Dictionary<Obilazak, Obilazak>();
                      
@@ -59,8 +62,8 @@ namespace CVRP1
             {
                 for (int j = 0; j <= brojVrhova; j++)
                 {
-                    feromoni[i, j] = 1;
-                    feromoni[j, i] = 1;
+                    feromoni[i, j] = 0.001;
+                    feromoni[j, i] = 0.001;
                     eta[i, j] = 1 / (vrhovi[i].udaljenost(vrhovi[j], 0));
                     mi[i, j] = (vrhovi[i].udaljenost(vrhovi[1]) + vrhovi[1].udaljenost(vrhovi[j]) - vrhovi[i].udaljenost(vrhovi[j]))/100;
                     if(mi[i,j] < miMin) mi[i,j] = miMin;
@@ -268,8 +271,8 @@ namespace CVRP1
                     // na taj nacin poticemo istrazivanje novih puteva...
 
                     ukupniPut[mrav] = prijedeniPut[mrav].duljinaObilaska();
-                    double ksi = 0.8;
-                    double tau0 = 0.0000000002;   // jos nije sigurno da je ovo dobra vrijednost za tau0
+                    double ksi = 0.2;
+                    double tau0 = 0.001;   // jos nije sigurno da je ovo dobra vrijednost za tau0
 
                     int prosli = 1;
                     for (int i = 1; i < prijedeniPut[mrav].put.Count(); i++)
@@ -341,14 +344,18 @@ namespace CVRP1
 
         static void Main(string[] args)
         {
+
             
+            
+
             double najboljeRjesenje = 1000000;
 
             Random rand = new Random();
+             
 
             // stalno pozivamo glavnu funkciju (to je kao da stalno ispocetka pokrecemo program) i, kad nam nadje bolje rjesenje od najboljeg do sada,
             // to rjesenje se ispisuje, skupa s duljinom puta za to rjesenje
-            while (true)
+            //while (true)
             {
                 // ovi parametri trenutno nemaju smisla jer pozivamo program s fiksiranim parametrima, ali ovaj dio programa zapravo
                 // generira neke kvazislucajne parametre, tj. tako nesto se moze iskoristiti kad nesto bitno promijenimo u programu
@@ -357,9 +364,9 @@ namespace CVRP1
                 double evap = rand.NextDouble() * 0.1 + 0.8;
                 int brojMrava = rand.Next(20, 30);
                 Console.WriteLine(DateTime.Now);
-                Obilazak rjesenje = nadjiRjesenje(25, 1, 2, 0.2, 100);
+                Obilazak rjesenje = nadjiRjesenje(25, 1, 2, 0.2, 200);
 
-               
+                rjesenje.nacrtaj();           
                 
                 double duljinaObilaskaRjesenja = rjesenje.duljinaObilaska();
                 if (duljinaObilaskaRjesenja < najboljeRjesenje)
