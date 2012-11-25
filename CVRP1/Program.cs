@@ -23,7 +23,7 @@ namespace CVRP1
                                     long kolikoIteracija = -100)
         {
             // ucitavanje testnih podataka
-            TestniPodaci podaci = new TestniPodaci(@"test\A-n32-k5.vrp");
+            TestniPodaci podaci = new TestniPodaci(@"test\A-n80-k10.vrp");
 
             Dictionary<Obilazak, Obilazak> poznataPoboljsanja = new Dictionary<Obilazak, Obilazak>();
                      
@@ -35,8 +35,15 @@ namespace CVRP1
                 vrhovi[i] = podaci.vrhovi[i];
             }
             
+            double gama = 2;
+            double lambda = 2;
             double[,] feromoni = new double[brojVrhova + 1, brojVrhova + 1];
             double[,] eta = new double[brojVrhova + 1, brojVrhova + 1];
+            double[,] mi = new double[brojVrhova + 1, brojVrhova + 1]; 
+            double[,] ka = new double[brojVrhova + 1, brojVrhova + 1];
+            double miMin = 0.2;
+            double miMax = 0.9;
+
 
             /* svakom vrhu pridruzujemo listu 15 najblizih vrhova i spremamo te podatke u rjecnik
              * najbliziVrhovi. moze se iskoristiti za ubrzavanja lokalnog pretrazivanja i sl. (vidi treci parametar u dvaOpt i triOpt).
@@ -55,6 +62,10 @@ namespace CVRP1
                     feromoni[i, j] = 1;
                     feromoni[j, i] = 1;
                     eta[i, j] = 1 / (vrhovi[i].udaljenost(vrhovi[j], 0));
+                    mi[i, j] = (vrhovi[i].udaljenost(vrhovi[1]) + vrhovi[1].udaljenost(vrhovi[j]) - vrhovi[i].udaljenost(vrhovi[j]))/100;
+                    if(mi[i,j] < miMin) mi[i,j] = miMin;
+                    if(mi[i,j] > miMax) mi[i,j] = miMax;
+                    ka[i, j] = (vrhovi[i].potraznja + vrhovi[j].potraznja) / kapacitetVozila;
                 }
             }
 
@@ -146,14 +157,17 @@ namespace CVRP1
                                 
                                 foreach (var vrh in moguciVrhovi)
                                 {
-                                    suma += (Math.Pow(feromoni[prosliVrh.oznaka, vrh.oznaka], alfa) * Math.Pow(eta[prosliVrh.oznaka, vrh.oznaka], beta));
+                                    suma += (Math.Pow(feromoni[prosliVrh.oznaka, vrh.oznaka], alfa) * Math.Pow(eta[prosliVrh.oznaka, vrh.oznaka], beta))
+                                         * Math.Pow(mi[prosliVrh.oznaka, vrh.oznaka], gama) * Math.Pow(ka[prosliVrh.oznaka, vrh.oznaka], lambda);
                                 }
 
                                 foreach (var vrh in moguciVrhovi)
                                 {
                                     vjerojatnosti[vrh.oznaka] =
                                         (Math.Pow(feromoni[prosliVrh.oznaka, vrh.oznaka], alfa) *
-                                        Math.Pow(eta[prosliVrh.oznaka, vrh.oznaka], beta)) / suma;
+                                        Math.Pow(eta[prosliVrh.oznaka, vrh.oznaka], beta)) *
+                                        Math.Pow(mi[prosliVrh.oznaka, vrh.oznaka], gama) *
+                                        Math.Pow(ka[prosliVrh.oznaka, vrh.oznaka], lambda) / suma;
                                 }
 
                                 double rasponDoProsli = 0;
@@ -183,7 +197,11 @@ namespace CVRP1
                                 foreach (var vrh in moguciVrhovi)
                                 {
                                     double vrijednostZaOvajVrh =
-                                        feromoni[prosliVrh.oznaka, vrh.oznaka] * Math.Pow(eta[prosliVrh.oznaka, vrh.oznaka], beta);
+                                        Math.Pow(feromoni[prosliVrh.oznaka, vrh.oznaka], alfa) *
+                                        Math.Pow(eta[prosliVrh.oznaka, vrh.oznaka], beta) *
+                                        Math.Pow(mi[prosliVrh.oznaka, vrh.oznaka], gama) *
+                                        Math.Pow(ka[prosliVrh.oznaka, vrh.oznaka], lambda);
+
                                     if (vrijednostZaOvajVrh >= najvecaVrijednost)
                                     {
                                         najvecaVrijednost = vrijednostZaOvajVrh;
@@ -233,20 +251,6 @@ namespace CVRP1
                             }
                         }
 
-                      /*  p = 1;
-                        while (p == 1)
-                        {
-                            p = 0;
-                            Obilazak mozdaBoljiPut2 = prijedeniPut[mrav].triOpt(kapacitetVozila, prijedeniPut[mrav].duljinaObilaska(), najbliziVrhovi);
-
-                            if (mozdaBoljiPut2 != null)
-                            {
-                                p = 1;
-                                prijedeniPut[mrav] = mozdaBoljiPut2;
-                                nasliSmoBoljiPut = true;
-                            }
-                        }
-                        */
                         if (nasliSmoBoljiPut) 
                             poznataPoboljsanja.Add(ulazniObilazak, prijedeniPut[mrav]);
                         else
@@ -321,21 +325,12 @@ namespace CVRP1
                     }
                 }
 
-                double maliDelta = 1;
-                int kolikoJednakih = 0;
-                foreach (var put in prijedeniPut)
-                {
-                    if (put.jeLiJednak(globalniNajboljiPut)) kolikoJednakih++;
-                }
-                if (kolikoJednakih > brojMrava / 3 && kolikoJednakih < 2 * brojMrava / 3)
-                    maliDelta = ((brojMrava - kolikoJednakih) / brojMrava);
 
                 int prosli2 = 1;
                 for (int i = 1; i < globalniNajboljiPut.put.Count(); i++)
                 {
-                    feromoni[globalniNajboljiPut.put[i].oznaka, prosli2] += feromonskiDelta * maliDelta;
-                    feromoni[prosli2, globalniNajboljiPut.put[i].oznaka] += feromonskiDelta * maliDelta;
-                    prosli2 = globalniNajboljiPut.put[i].oznaka;
+                    feromoni[globalniNajboljiPut.put[i].oznaka, prosli2] += feromonskiDelta;
+                    feromoni[prosli2, globalniNajboljiPut.put[i].oznaka] += feromonskiDelta;
                 }
                 boljeRjesenjePrijeKoliko++;
                 if (kolikoIteracija < 0  && boljeRjesenjePrijeKoliko == Math.Abs(kolikoIteracija)) return globalniNajboljiPut;
@@ -362,7 +357,7 @@ namespace CVRP1
                 double evap = rand.NextDouble() * 0.1 + 0.8;
                 int brojMrava = rand.Next(20, 30);
                 Console.WriteLine(DateTime.Now);
-                Obilazak rjesenje = nadjiRjesenje(25, 1, 2, 0.2, 50);
+                Obilazak rjesenje = nadjiRjesenje(25, 1, 2, 0.2, 100);
 
                
                 
