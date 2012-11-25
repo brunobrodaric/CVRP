@@ -24,6 +24,25 @@ namespace CVRP1
             put.Add(vrh);        
         }
 
+        public bool jeLiJednak(Obilazak o)
+        {
+            if (o == null && this == null) return true;
+            if (o == null && this != null) return false;
+            if (o != null && this == null) return false;
+            int brojCvorova1 = o.put.Count();
+            int brojCvorova2 = this.put.Count();
+            if (brojCvorova1 != brojCvorova2) return false;
+            else 
+            {
+                for (int i = 0; i < brojCvorova1; ++i)
+                {
+                    if (o.put[i] != this.put[i]) return false;
+                }
+                return true;
+            }
+            
+        }
+
         public void ispisi()
         {
             if (put == null) return;

@@ -23,7 +23,7 @@ namespace CVRP1
                                     long kolikoIteracija = -100)
         {
             // ucitavanje testnih podataka
-            TestniPodaci podaci = new TestniPodaci(@"test\B-n34-k5.vrp");
+            TestniPodaci podaci = new TestniPodaci(@"test\A-n32-k5.vrp");
 
             Dictionary<Obilazak, Obilazak> poznataPoboljsanja = new Dictionary<Obilazak, Obilazak>();
                      
@@ -310,7 +310,7 @@ namespace CVRP1
                 // najbolji put... a inace je, ako biramo samo jedno od tog dvoje, bolje stalno azurirati samo globalni. za sada stoji tako,
                 // radi jednostavnosti.
 
-                double feromonskiDelta = 1 / globalnaMinDuljina;
+                double feromonskiDelta = (1 / globalnaMinDuljina) * parametarEvaporacije ;
 
                 for (int i = 1; i <= brojVrhova; i++)
                 {
@@ -321,11 +321,20 @@ namespace CVRP1
                     }
                 }
 
+                double maliDelta = 1;
+                int kolikoJednakih = 0;
+                foreach (var put in prijedeniPut)
+                {
+                    if (put.jeLiJednak(globalniNajboljiPut)) kolikoJednakih++;
+                }
+                if (kolikoJednakih > brojMrava / 3 && kolikoJednakih < 2 * brojMrava / 3)
+                    maliDelta = ((brojMrava - kolikoJednakih) / brojMrava);
+
                 int prosli2 = 1;
                 for (int i = 1; i < globalniNajboljiPut.put.Count(); i++)
                 {
-                    feromoni[globalniNajboljiPut.put[i].oznaka, prosli2] += feromonskiDelta;
-                    feromoni[prosli2, globalniNajboljiPut.put[i].oznaka] += feromonskiDelta;
+                    feromoni[globalniNajboljiPut.put[i].oznaka, prosli2] += feromonskiDelta * maliDelta;
+                    feromoni[prosli2, globalniNajboljiPut.put[i].oznaka] += feromonskiDelta * maliDelta;
                     prosli2 = globalniNajboljiPut.put[i].oznaka;
                 }
                 boljeRjesenjePrijeKoliko++;
@@ -353,7 +362,9 @@ namespace CVRP1
                 double evap = rand.NextDouble() * 0.1 + 0.8;
                 int brojMrava = rand.Next(20, 30);
                 Console.WriteLine(DateTime.Now);
-                Obilazak rjesenje = nadjiRjesenje(25, 1, 2, 0.2, 1000);
+                Obilazak rjesenje = nadjiRjesenje(25, 1, 2, 0.2, 50);
+
+               
                 
                 double duljinaObilaskaRjesenja = rjesenje.duljinaObilaska();
                 if (duljinaObilaskaRjesenja < najboljeRjesenje)
