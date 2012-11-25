@@ -125,6 +125,9 @@ namespace CVRP1
             else return null;
         }
 
+        // funkcija za crtanje rjesenja... potrebno imati instaliran graphviz
+        // uglavnom, skoro sve je podesivo, guglati npr. graphviz attributes
+        // generira sliku rjesenja "nacrtaj.png" u bin\debug folderu projekta
         public void nacrtaj()
         {
             System.IO.StreamWriter file = new System.IO.StreamWriter("nacrtaj.txt");

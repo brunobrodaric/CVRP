@@ -27,9 +27,7 @@ namespace CVRP1
         {
             // ucitavanje testnih podataka
             TestniPodaci podaci = new TestniPodaci(@"test\B-n34-k5.vrp");
-
-            Dictionary<Obilazak, Obilazak> poznataPoboljsanja = new Dictionary<Obilazak, Obilazak>();
-                     
+              
             int brojVrhova = podaci.brojVrhova;
             Vrh[] vrhovi = new Vrh[brojVrhova+1];
             double kapacitetVozila = podaci.kapacitetVozila;
@@ -42,6 +40,8 @@ namespace CVRP1
             double lambda = 2;
             double[,] feromoni = new double[brojVrhova + 1, brojVrhova + 1];
             double[,] eta = new double[brojVrhova + 1, brojVrhova + 1];
+
+            //dodani parametri mi i ka, objasnjeno u dokumentu "improvedVRP"
             double[,] mi = new double[brojVrhova + 1, brojVrhova + 1]; 
             double[,] ka = new double[brojVrhova + 1, brojVrhova + 1];
             double miMin = 0.2;
@@ -49,7 +49,7 @@ namespace CVRP1
 
 
             /* svakom vrhu pridruzujemo listu 15 najblizih vrhova i spremamo te podatke u rjecnik
-             * najbliziVrhovi. moze se iskoristiti za ubrzavanja lokalnog pretrazivanja i sl. (vidi treci parametar u dvaOpt i triOpt).
+             * najbliziVrhovi.
              * za sad iskoristeno samo kod trazenja mogucih vrhova, vidi popunjavanje liste moguciVrhovi
              */
             Dictionary<Vrh, List<Vrh>> najbliziVrhovi = new Dictionary<Vrh, List<Vrh>>();
@@ -210,7 +210,6 @@ namespace CVRP1
                                         najvecaVrijednost = vrijednostZaOvajVrh;
                                         sljedeciVrh = vrh;
                                     }
-
                                 }
                             }
                             else
@@ -232,9 +231,8 @@ namespace CVRP1
                     // dvaOpt ili triOpt... medutim, cini se da to ne ubrzava program (mozda nesto nije dobro napravljeno?)... ali ga ni ne
                     // usporava... znaci, to sad nije toliko bitno, prouciti kasnije.
                     
-                    if (brojIteracije % 10 == 9  &&  poznataPoboljsanja.ContainsKey(prijedeniPut[mrav]) == false)
+                    if (brojIteracije % 10 == 9)
                     {
-                        bool nasliSmoBoljiPut = false;
                         Obilazak ulazniObilazak = new Obilazak();
                         foreach (var vrh in prijedeniPut[mrav].put)
                         {
@@ -250,29 +248,16 @@ namespace CVRP1
                             {
                                 p = 1;
                                 prijedeniPut[mrav] = mozdaBoljiPut1;
-                                nasliSmoBoljiPut = true;
                             }
                         }
-
-                        if (nasliSmoBoljiPut) 
-                            poznataPoboljsanja.Add(ulazniObilazak, prijedeniPut[mrav]);
-                        else
-                            poznataPoboljsanja.Add(ulazniObilazak, null);
                     }
-                    else
-                    {
-                        if (poznataPoboljsanja.ContainsKey(prijedeniPut[mrav]) && poznataPoboljsanja[prijedeniPut[mrav]] != null)
-                        {                          
-                            prijedeniPut[mrav] = poznataPoboljsanja[prijedeniPut[mrav]];                          
-                        }
-                    }
-
+                    
                     // stutzle-99, 7. str. skroz dolje, local pheromone update: (znaci, put koji mrav izabere gubi dio svojih feromona,
                     // na taj nacin poticemo istrazivanje novih puteva...
 
                     ukupniPut[mrav] = prijedeniPut[mrav].duljinaObilaska();
                     double ksi = 0.2;
-                    double tau0 = 0.001;   // jos nije sigurno da je ovo dobra vrijednost za tau0
+                    double tau0 = 0.001;   
 
                     int prosli = 1;
                     for (int i = 1; i < prijedeniPut[mrav].put.Count(); i++)
@@ -328,7 +313,6 @@ namespace CVRP1
                     }
                 }
 
-
                 int prosli2 = 1;
                 for (int i = 1; i < globalniNajboljiPut.put.Count(); i++)
                 {
@@ -344,27 +328,18 @@ namespace CVRP1
 
         static void Main(string[] args)
         {
-
-            
-            
-
             double najboljeRjesenje = 1000000;
 
             Random rand = new Random();
              
-
             // stalno pozivamo glavnu funkciju (to je kao da stalno ispocetka pokrecemo program) i, kad nam nadje bolje rjesenje od najboljeg do sada,
             // to rjesenje se ispisuje, skupa s duljinom puta za to rjesenje
             //while (true)
             {
-                // ovi parametri trenutno nemaju smisla jer pozivamo program s fiksiranim parametrima, ali ovaj dio programa zapravo
-                // generira neke kvazislucajne parametre, tj. tako nesto se moze iskoristiti kad nesto bitno promijenimo u programu
-                // i nismo sigurni s kojim parametrima novi program najbolje radi, pa ga pustimo da isprobava razne...
-                double beta = rand.NextDouble() * 1 + 1;
-                double evap = rand.NextDouble() * 0.1 + 0.8;
-                int brojMrava = rand.Next(20, 30);
+
                 Console.WriteLine(DateTime.Now);
-                Obilazak rjesenje = nadjiRjesenje(25, 1, 2, 0.2, 200);
+                Obilazak rjesenje = nadjiRjesenje(25, 1, 2, 0.2, 50);
+                Console.WriteLine(DateTime.Now);
 
                 rjesenje.nacrtaj();           
                 
@@ -374,10 +349,6 @@ namespace CVRP1
                     najboljeRjesenje = duljinaObilaskaRjesenja;
                     rjesenje.ispisi();                   
                     Console.WriteLine(rjesenje.duljinaObilaska());
-                 // ispis parametara koji slijedi ima smisla samo ako su parametri slucajno generirani...
-                 /* Console.Write("alfa = " + alfa + ", beta = " + beta + ", evap = " + evap);
-                    Console.WriteLine();
-                    Console.Write("broj mrava = " + brojMrava); */
                     Console.WriteLine(); 
                 }
             }
